@@ -1,0 +1,76 @@
+{
+    "roles": [
+        {
+            "id": 1,
+            "name": "史萊姆",
+            "hp": 3,
+            "damage": 1,
+            "knockback": 100,
+            "knockbackCooldown": 0.3,
+            "attackRange": 0,
+            "detectionZone": 1,
+            "speed": 1,
+            "bodyRemainTime": 2
+        },
+        {
+            "id": 2,
+            "name": "蜜蜂",
+            "hp": 3,
+            "damage": 1,
+            "knockback": 100,
+            "knockbackCooldown": 0.5,
+            "attackRange": 0,
+            "detectionZone": 0.7,
+            "speed": 1.1,
+            "bodyRemainTime": 2
+        },
+        {
+            "id": 3,
+            "name": "骷髏",
+            "hp": 4,
+            "damage": 1,
+            "knockback": 100,
+            "knockbackCooldown": 0.3,
+            "attackRange": 0,
+            "detectionZone": 0.8,
+            "speed": 1,
+            "bodyRemainTime": 2
+        },
+        {
+            "id": 4,
+            "name": "狼",
+            "hp": 5,
+            "damage": 1,
+            "knockback": 100,
+            "knockbackCooldown": 0.5,
+            "attackRange": 0.25,
+            "detectionZone": 1,
+            "speed": 1.1,
+            "bodyRemainTime": 2
+        },
+        {
+            "id": 5,
+            "name": "哥布林",
+            "hp": 10,
+            "damage": 2,
+            "knockback": 150,
+            "knockbackCooldown": 0.5,
+            "attackRange": 0.4,
+            "detectionZone": 0.8,
+            "speed": 0.5,
+            "bodyRemainTime": 3
+        },
+        {
+            "id": 6,
+            "name": "骷髏戰士",
+            "hp": 5,
+            "damage": 1,
+            "knockback": 100,
+            "knockbackCooldown": 0.3,
+            "attackRange": 0.25,
+            "detectionZone": 1,
+            "speed": 0.9,
+            "bodyRemainTime": 2
+        }
+    ]
+}
