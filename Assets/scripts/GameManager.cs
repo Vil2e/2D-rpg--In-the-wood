@@ -8,6 +8,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Threading.Tasks;
 using System;
+using UnityEngine.ResourceManagement.ResourceProviders;
 
 
 public class GameManager : MonoBehaviour
@@ -38,6 +39,11 @@ public class GameManager : MonoBehaviour
 
 	}
 
+	private void Start()
+	{
+		print(LevelManager.current_Level);
+	}
+
 	private void Update()
 	{
 		if (isGameStart && Input.GetKeyDown(KeyCode.M))
@@ -57,21 +63,11 @@ public class GameManager : MonoBehaviour
 			player = Instantiate(asyncOperationHandle.Result);
 			OnPlayerSpawned?.Invoke(player);
 		}
-		else
-		{
-			Debug.Log("Loading Asset failed!");
-		}
 	}
 	public void LoadNextScene()
 	{
-		int totalSceneAmount = SceneManager.sceneCountInBuildSettings;
-		int currentScene = SceneManager.GetActiveScene().buildIndex;
-		int nextScene = currentScene + 1;
-
-		if (nextScene > totalSceneAmount - 1) { return; }
-
 		transitionAnim.SetTrigger("End");
-		SceneManager.LoadScene(nextScene);
+		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.current_Level + 1)));
 		transitionAnim.SetTrigger("Start");
 
 	}
@@ -79,14 +75,34 @@ public class GameManager : MonoBehaviour
 	public void ClickStartGame()
 	{
 		SFXManager.instance.ClickSound();
-		SceneManager.LoadScene(1);
+		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.current_Level + 1)));
+
 	}
 
-	public void BackToMenu()//回到遊戲
+	public void BackToMenu()//回到遊戲menu
 	{
 		SFXManager.instance.ClickSound();
-		SceneManager.LoadScene(0);
+		SceneManager.LoadScene("Level_00");
+		LevelManager.current_Level = 0;
 		Time.timeScale = 1;
+
+
+	}
+
+	IEnumerator LoadNextLevel(string level)
+	{
+		LevelManager.current_Level++;
+		if (LevelManager.current_Level > LevelManager.maxLevel)
+		{
+			LevelManager.current_Level = LevelManager.maxLevel;
+		}
+		AsyncOperationHandle<SceneInstance> sceneInstance = Addressables.LoadSceneAsync(level);
+		while (sceneInstance.Status != AsyncOperationStatus.Succeeded)
+		{
+			yield return null;
+		}
+
+
 
 	}
 
@@ -108,6 +124,7 @@ public class GameManager : MonoBehaviour
 
 	}
 
+	// 從pause menu回到遊戲
 	public void Continue()
 	{
 		SFXManager.instance.ClickSound();
@@ -121,7 +138,7 @@ public class GameManager : MonoBehaviour
 	{
 		SFXManager.instance.ClickSound();
 		SaveData saveData = new SaveData();
-		int currentScene = SceneManager.GetActiveScene().buildIndex;
+		int currentScene = LevelManager.current_Level;
 
 		//寫入目前第幾關
 		saveData.levelNumber = currentScene;
@@ -137,11 +154,11 @@ public class GameManager : MonoBehaviour
 	{
 		SFXManager.instance.ClickSound();
 
-		int level = ReadJson.Instance.GetSavedLevel();
+		int levelNum = ReadJson.Instance.GetSavedLevel();
 
-		if (level != 0)
+		if (levelNum != 0)
 		{
-			SceneManager.LoadScene(level);
+			StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.current_Level + 1)));
 		}
 		else
 		{

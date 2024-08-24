@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Default Local Group
+  m_Name: Roles
   m_EditorClassIdentifier: 
-  m_GroupName: Default Local Group
+  m_GroupName: Roles
   m_Data:
     m_SerializedData: []
   m_GUID: 38fd4cd1300134372803e50dce7c9ce5
   m_SerializeEntries:
   - m_GUID: 8f2705a49b39840b1808b917d7e0b637
-    m_Address: player1
+    m_Address: Role01
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11b96e1492fee4f6e90d54db8304effd
-    m_Address: player2
+    m_Address: Role02
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
