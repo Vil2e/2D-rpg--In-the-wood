@@ -23,25 +23,24 @@ public class GameManager : MonoBehaviour
 	[SerializeField] Animator transitionAnim;
 	[SerializeField] GameObject stopMenu;
 
-	[SerializeField] AssetReferenceGameObject playerReference;
 	public static event Action<GameObject> OnPlayerSpawned;
 
 
 	string path = Application.dataPath + "/streamingAssets";
 
 
-
-	void Awake()
+	private void Awake()
 	{
-		AsyncOperationHandle<GameObject> asyncOperationHandle = playerReference.LoadAssetAsync<GameObject>();
-		asyncOperationHandle.Completed += AsyncOperationHandle_Completed;
+		LoadRole();
 
 
 	}
 
+
 	private void Start()
 	{
-		print(LevelManager.current_Level);
+		print(LevelManager.instance.current_Level);
+
 	}
 
 	private void Update()
@@ -51,60 +50,76 @@ public class GameManager : MonoBehaviour
 			isGamePause = true;
 			stopMenu.SetActive(true);
 			Time.timeScale = 0;
-
 		}
 
 	}
 
-	void AsyncOperationHandle_Completed(AsyncOperationHandle<GameObject> asyncOperationHandle)
-	{   //確認載入成功 -> 生成物件, 否則印出錯誤訊息
-		if (asyncOperationHandle.Status == AsyncOperationStatus.Succeeded && isGameStart)
+	void LoadRole()
+	{
+		//確認載入成功 -> 生成物件, 否則印出錯誤訊息
+		AsyncOperationHandle<GameObject> asyncOperationHandle = Addressables.LoadAssetAsync<GameObject>("Role01");
+		asyncOperationHandle.Completed += (handle) =>
 		{
-			player = Instantiate(asyncOperationHandle.Result);
-			OnPlayerSpawned?.Invoke(player);
-		}
+			if (handle.Status == AsyncOperationStatus.Succeeded && isGameStart)
+			{
+				player = Instantiate(handle.Result);
+				OnPlayerSpawned?.Invoke(player);
+				Addressables.Release(asyncOperationHandle);
+			}
+		};
+
 	}
+
+	// 換關(index num會在換關時遞增)
 	public void LoadNextScene()
 	{
 		transitionAnim.SetTrigger("End");
-		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.current_Level + 1)));
+		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.instance.current_Level + 1)));
+		LoadRole();
 		transitionAnim.SetTrigger("Start");
 
 	}
 
-	public void ClickStartGame()
-	{
-		SFXManager.instance.ClickSound();
-		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.current_Level + 1)));
-
-	}
-
-	public void BackToMenu()//回到遊戲menu
-	{
-		SFXManager.instance.ClickSound();
-		SceneManager.LoadScene("Level_00");
-		LevelManager.current_Level = 0;
-		Time.timeScale = 1;
-
-
-	}
-
+	// 異步載入要切換的level
 	IEnumerator LoadNextLevel(string level)
 	{
-		LevelManager.current_Level++;
-		if (LevelManager.current_Level > LevelManager.maxLevel)
+		LevelManager.instance.current_Level++;
+		if (LevelManager.instance.current_Level > LevelManager.maxLevel)
 		{
-			LevelManager.current_Level = LevelManager.maxLevel;
+			LevelManager.instance.current_Level = 0;
+			level = "Level_0" + LevelManager.instance.current_Level;
 		}
+
 		AsyncOperationHandle<SceneInstance> sceneInstance = Addressables.LoadSceneAsync(level);
 		while (sceneInstance.Status != AsyncOperationStatus.Succeeded)
 		{
 			yield return null;
 		}
 
+	}
+	// 給sart game button用的func
+	public void ClickStartGame()
+	{
+		SFXManager.instance.ClickSound();
+		isGameStart = true;
+		// LoadRole();
+		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.instance.current_Level + 1)));
+		LoadRole();
 
 
 	}
+
+	//回到遊戲menu
+	public void BackToMenu()
+	{
+		SFXManager.instance.ClickSound();
+		SceneManager.LoadScene("Level_00");
+		LevelManager.instance.current_Level = 0;
+		Time.timeScale = 1;
+
+
+	}
+
 
 	public void QuitGame()
 	{
@@ -113,7 +128,7 @@ public class GameManager : MonoBehaviour
 
 	}
 
-	//解除原本隱藏在關卡的門
+	//	解除原本隱藏在關卡的門
 	public void LevelFinished()
 	{
 		if (door != null)
@@ -138,7 +153,7 @@ public class GameManager : MonoBehaviour
 	{
 		SFXManager.instance.ClickSound();
 		SaveData saveData = new SaveData();
-		int currentScene = LevelManager.current_Level;
+		int currentScene = LevelManager.instance.current_Level;
 
 		//寫入目前第幾關
 		saveData.levelNumber = currentScene;
@@ -158,7 +173,8 @@ public class GameManager : MonoBehaviour
 
 		if (levelNum != 0)
 		{
-			StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.current_Level + 1)));
+			StartCoroutine(LoadNextLevel("Level_0" + levelNum));
+			LevelManager.instance.current_Level = levelNum;
 		}
 		else
 		{

@@ -51,7 +51,7 @@
         {
             "id": 5,
             "name": "哥布林",
-            "hp": 10,
+            "hp": 1,
             "damage": 2,
             "knockback": 150,
             "knockbackCooldown": 0.5,
