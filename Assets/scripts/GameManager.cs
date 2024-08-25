@@ -84,14 +84,14 @@ public class GameManager : MonoBehaviour
 		}
 		AsyncOperationHandle<SceneInstance> sceneInstance = Addressables.LoadSceneAsync(level);
 
-		// 检查加载是否成功
+		// 檢查異步載入是否成功
 		while (sceneInstance.Status != AsyncOperationStatus.Succeeded)
 		{
 			yield return null;
 		}
-		// 场景加载成功后，设置 current_role 并调用 LoadRole
+
+		// 場景載入成功後 設定 current_role 並調用 LoadRole (Awake關掉 這裡打開會出問題)
 		// current_role = LevelManager.instance.current_role;
-		// print("current role after loading scene: " + current_role);
 		// LoadRole(current_role);
 
 	}
