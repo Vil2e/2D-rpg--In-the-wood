@@ -886,6 +886,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   current_Level: 0
+  current_role: Role01
 --- !u!4 &1200142749
 Transform:
   m_ObjectHideFlags: 0

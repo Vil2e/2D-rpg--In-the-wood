@@ -9,6 +9,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Threading.Tasks;
 using System;
 using UnityEngine.ResourceManagement.ResourceProviders;
+using UnityEngine.EventSystems;
 
 
 public class GameManager : MonoBehaviour
@@ -22,25 +23,17 @@ public class GameManager : MonoBehaviour
 
 	[SerializeField] Animator transitionAnim;
 	[SerializeField] GameObject stopMenu;
+	string current_role;
 
 	public static event Action<GameObject> OnPlayerSpawned;
 
 
 	string path = Application.dataPath + "/streamingAssets";
 
-
 	private void Awake()
 	{
-		LoadRole();
-
-
-	}
-
-
-	private void Start()
-	{
-		print(LevelManager.instance.current_Level);
-
+		current_role = LevelManager.instance.current_role;
+		LoadRole(current_role);
 	}
 
 	private void Update()
@@ -54,57 +47,82 @@ public class GameManager : MonoBehaviour
 
 	}
 
-	void LoadRole()
+	// 用來觀測異步下載進度
+	private IEnumerator ShowLoadingProgress(AsyncOperationHandle<GameObject> handle)
 	{
-		//確認載入成功 -> 生成物件, 否則印出錯誤訊息
-		AsyncOperationHandle<GameObject> asyncOperationHandle = Addressables.LoadAssetAsync<GameObject>("Role01");
-		asyncOperationHandle.Completed += (handle) =>
+		while (!handle.IsDone)
 		{
-			if (handle.Status == AsyncOperationStatus.Succeeded && isGameStart)
-			{
-				player = Instantiate(handle.Result);
-				OnPlayerSpawned?.Invoke(player);
-				Addressables.Release(asyncOperationHandle);
-			}
-		};
+			// 印出目前進度
+			Debug.Log($"Loading Progress: {handle.PercentComplete * 100}%");
 
+			// 等待下一幀再檢查進度
+			yield return null;
+		}
+
+		// 載入完成後印出100%
+		Debug.Log("Loading Progress: 100%");
 	}
 
 	// 換關(index num會在換關時遞增)
 	public void LoadNextScene()
 	{
 		transitionAnim.SetTrigger("End");
-		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.instance.current_Level + 1)));
-		LoadRole();
+		Debug.Log("LoadNextLevel is being called.");
+		StartCoroutine(LoadLevelAsset("Level_0" + (LevelManager.instance.current_Level + 1)));
 		transitionAnim.SetTrigger("Start");
 
 	}
 
-	// 異步載入要切換的level
-	IEnumerator LoadNextLevel(string level)
+	// 異步載入要切換的level asset
+	IEnumerator LoadLevelAsset(string level)
 	{
 		LevelManager.instance.current_Level++;
-		if (LevelManager.instance.current_Level > LevelManager.maxLevel)
+		if (LevelManager.instance.current_Level > LevelManager.instance.MaxLevel)
 		{
 			LevelManager.instance.current_Level = 0;
 			level = "Level_0" + LevelManager.instance.current_Level;
 		}
-
 		AsyncOperationHandle<SceneInstance> sceneInstance = Addressables.LoadSceneAsync(level);
+
+		// 检查加载是否成功
 		while (sceneInstance.Status != AsyncOperationStatus.Succeeded)
 		{
 			yield return null;
 		}
+		// 场景加载成功后，设置 current_role 并调用 LoadRole
+		// current_role = LevelManager.instance.current_role;
+		// print("current role after loading scene: " + current_role);
+		// LoadRole(current_role);
 
 	}
+
+	// 異步載入player Asset並生成
+	void LoadRole(string role)
+	{
+		print("current role: " + current_role);
+		//確認載入成功 -> 生成物件, 否則印出錯誤訊息
+		AsyncOperationHandle<GameObject> asyncOperationHandle = Addressables.LoadAssetAsync<GameObject>(role);
+		StartCoroutine(ShowLoadingProgress(asyncOperationHandle));
+		asyncOperationHandle.Completed += (handle) =>
+		{
+			if (handle.Status == AsyncOperationStatus.Succeeded && isGameStart)
+			{
+				print("instantiate player");
+				player = Instantiate(handle.Result);
+				OnPlayerSpawned?.Invoke(player);// 檢查OnPlayerSpawned是否有訂閱, 有則丟入player作為參數 null則return
+				Addressables.Release(asyncOperationHandle);
+			}
+		};
+
+	}
+
 	// 給sart game button用的func
 	public void ClickStartGame()
 	{
 		SFXManager.instance.ClickSound();
 		isGameStart = true;
-		// LoadRole();
-		StartCoroutine(LoadNextLevel("Level_0" + (LevelManager.instance.current_Level + 1)));
-		LoadRole();
+		LoadNextScene();
+		current_role = LevelManager.instance.current_role;
 
 
 	}
@@ -117,9 +135,7 @@ public class GameManager : MonoBehaviour
 		LevelManager.instance.current_Level = 0;
 		Time.timeScale = 1;
 
-
 	}
-
 
 	public void QuitGame()
 	{
@@ -136,7 +152,6 @@ public class GameManager : MonoBehaviour
 			SFXManager.instance.DoorAppear();
 			door.SetActive(true);
 		}
-
 	}
 
 	// 從pause menu回到遊戲
@@ -146,7 +161,6 @@ public class GameManager : MonoBehaviour
 		isGamePause = false;
 		Time.timeScale = 1;
 		stopMenu.SetActive(false);
-
 	}
 
 	public void Save()//存擋
@@ -162,7 +176,6 @@ public class GameManager : MonoBehaviour
 		string jsonFile = JsonUtility.ToJson(saveData);
 		File.WriteAllText(path + "/save.json", jsonFile);
 
-
 	}
 
 	public void Load()//讀檔功能
@@ -173,7 +186,7 @@ public class GameManager : MonoBehaviour
 
 		if (levelNum != 0)
 		{
-			StartCoroutine(LoadNextLevel("Level_0" + levelNum));
+			StartCoroutine(LoadLevelAsset("Level_0" + levelNum));
 			LevelManager.instance.current_Level = levelNum;
 		}
 		else
@@ -181,7 +194,5 @@ public class GameManager : MonoBehaviour
 			print("You dont have any saved file");
 		}
 	}
-
-
 
 }

@@ -8,7 +8,10 @@ public class LevelManager : MonoBehaviour
 {
 	public static LevelManager instance;
 	public int current_Level = 0;
-	public static int maxLevel = 3;
+	int maxLevel = 2;
+	public int MaxLevel { get { return maxLevel; } }
+
+	public string current_role = "Role01";
 
 	void Awake()
 	{
