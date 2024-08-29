@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
 	string current_role;
 
 	public static event Action<GameObject> OnPlayerSpawned;
+	AsyncOperationHandle<GameObject> asyncOperationHandle;
+	AsyncOperationHandle<SceneInstance> sceneInstance;
 
 
 	string path = Application.dataPath + "/streamingAssets";
@@ -37,7 +39,7 @@ public class GameManager : MonoBehaviour
 		// 保持 GameManager 在場景切換後不被銷毀
 		DontDestroyOnLoad(this.gameObject);
 
-		// 其他的初始化邏輯
+
 		if (instance == null)
 		{
 			instance = this;
@@ -47,6 +49,29 @@ public class GameManager : MonoBehaviour
 			Destroy(gameObject);
 		}
 
+		// 訂閱場景卸載事件
+		SceneManager.sceneUnloaded += OnSceneUnloaded;
+
+	}
+
+	// 釋放內存
+	private void OnSceneUnloaded(Scene current)
+	{
+		if (asyncOperationHandle.IsValid())
+		{
+			// 釋放player
+			Addressables.Release(asyncOperationHandle);
+			// 釋放場景
+			Addressables.Release(sceneInstance);
+
+			// Debug.Log("資源已釋放");
+		}
+	}
+
+	// 解除訂閱
+	private void OnDisable()
+	{
+		SceneManager.sceneUnloaded -= OnSceneUnloaded;
 	}
 
 	// 用來觀測異步下載進度
@@ -85,14 +110,14 @@ public class GameManager : MonoBehaviour
 			level = "Level_0" + LevelManager.instance.current_Level;
 		}
 
-		AsyncOperationHandle<SceneInstance> sceneInstance = Addressables.LoadSceneAsync(level, LoadSceneMode.Single, false);
+		sceneInstance = Addressables.LoadSceneAsync(level, LoadSceneMode.Single, false);
 		yield return sceneInstance; // 等待sceneInstance載入完成 再繼續下一步
 
 		sceneInstance.Result.ActivateAsync().completed += (operation) =>
 		{
 			// Debug.Log("場景載入完成：" + level);
 
-			// 在這裡加載玩家角色
+			// 在這裡載入玩家角色
 			current_role = LevelManager.instance.current_role;
 			LoadRole(current_role);
 			uiMgr = FindObjectOfType<UIManager>();
@@ -105,7 +130,7 @@ public class GameManager : MonoBehaviour
 	{
 		// print("current role: " + current_role);
 		//確認載入成功 -> 生成物件, 否則印出錯誤訊息
-		AsyncOperationHandle<GameObject> asyncOperationHandle = Addressables.LoadAssetAsync<GameObject>(role);
+		asyncOperationHandle = Addressables.LoadAssetAsync<GameObject>(role);
 		StartCoroutine(ShowLoadingProgress(asyncOperationHandle));
 		asyncOperationHandle.Completed += (handle) =>
 		{
@@ -113,8 +138,8 @@ public class GameManager : MonoBehaviour
 			{
 				// print("instantiate player");
 				player = Instantiate(handle.Result);
-				OnPlayerSpawned?.Invoke(player);// 檢查OnPlayerSpawned是否有訂閱, 有則丟入player作為參數 null則return
-				Addressables.Release(asyncOperationHandle);
+				// 檢查OnPlayerSpawned是否有訂閱, 有則丟入player作為參數 null則return
+				OnPlayerSpawned?.Invoke(player);
 
 			}
 			else
@@ -159,7 +184,8 @@ public class GameManager : MonoBehaviour
 		uiMgr.UnhideDoor();
 	}
 
-	public void Save()//存擋
+	// 存擋
+	public void Save()
 	{
 		SFXManager.instance.ClickSound();
 		SaveData saveData = new SaveData();
@@ -178,7 +204,8 @@ public class GameManager : MonoBehaviour
 
 	}
 
-	public void Load()//讀檔功能
+	// 讀檔功能
+	public void Load()
 	{
 		SFXManager.instance.ClickSound();
 
@@ -200,6 +227,7 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
+	// 確認isGamePause status
 	public bool GetGamePauseStatus()
 	{
 		return uiMgr.IsGamePause;
