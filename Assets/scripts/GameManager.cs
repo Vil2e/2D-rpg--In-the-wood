@@ -115,6 +115,7 @@ public class GameManager : MonoBehaviour
 				player = Instantiate(handle.Result);
 				OnPlayerSpawned?.Invoke(player);// 檢查OnPlayerSpawned是否有訂閱, 有則丟入player作為參數 null則return
 				Addressables.Release(asyncOperationHandle);
+
 			}
 			else
 			{

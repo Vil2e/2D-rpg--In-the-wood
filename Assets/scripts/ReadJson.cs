@@ -65,7 +65,7 @@ public class ReadJson : MonoBehaviour
 
 			return (level, selectedRole);
 		}
-		else { return (0, ""); }
+		else { return (0, "Role01"); }
 
 
 	}
