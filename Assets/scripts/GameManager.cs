@@ -163,9 +163,13 @@ public class GameManager : MonoBehaviour
 		SFXManager.instance.ClickSound();
 		SaveData saveData = new SaveData();
 		int currentScene = LevelManager.instance.current_Level;
+		string selectedRole = LevelManager.instance.current_role;
 
 		//寫入目前第幾關
 		saveData.levelNumber = currentScene;
+
+		//寫入選擇角色
+		saveData.selectedRole = selectedRole;
 
 		//轉成json、存擋
 		string jsonFile = JsonUtility.ToJson(saveData);
@@ -177,8 +181,12 @@ public class GameManager : MonoBehaviour
 	{
 		SFXManager.instance.ClickSound();
 
-		int levelNum = ReadJson.Instance.GetSavedLevel();
+		var data = ReadJson.Instance.GetSavedData();
+		int levelNum = data.Item1;
+		string role = data.Item2;
+		LevelManager.instance.current_role = role;
 		isGameStart = true;
+
 
 		if (levelNum != 0)
 		{

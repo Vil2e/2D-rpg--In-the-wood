@@ -4,5 +4,6 @@ using UnityEngine;
 
 public class SaveData
 {
-    public int levelNumber;
+	public int levelNumber;
+	public string selectedRole;
 }

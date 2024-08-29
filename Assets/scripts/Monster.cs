@@ -60,7 +60,7 @@ public class Monster : MonoBehaviour
         //賦值
         detectionZone = GetComponentInChildren<DetectionZone>();
         detectRange = GetComponentInChildren<CircleCollider2D>().radius;
-        
+
         Health = monster.hp;
         Damage = monster.damage;
         knockbackForce = monster.knockback;
@@ -74,22 +74,18 @@ public class Monster : MonoBehaviour
 
     private void Start()
     {
-        //mystate = new RoleState();
-        
+
         animator = GetComponent<Animator>();
         animator.SetBool("isAlive", isAlive);
         rb = GetComponentInChildren<Rigidbody2D>();
         physicsCollider = GetComponent<Collider2D>();
-        //detectionZone = GetComponentInChildren<DetectionZone>();
 
-        
+
     }
 
 
     private void Defeated()
     {
-      
-
         animator.SetBool("isAttack", false);
         SFXManager.instance.DeathSound();
         physicsCollider.enabled = false;
@@ -103,8 +99,6 @@ public class Monster : MonoBehaviour
         }
 
         CancelInvoke("ReApproach");
-
-        
 
         Invoke("DestroyEnemy", bodyRemainTime);
 
