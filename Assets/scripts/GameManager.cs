@@ -14,15 +14,14 @@ using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour
 {
-	[SerializeField] bool isGameStart;//避免在menu畫面生成player
-	[SerializeField] bool isGamePause;//如果game pause,設定playerControl無反應
-	public bool IsGamePause { get { return isGamePause; } }
-
+	[SerializeField] bool isGameStart;
+	public bool IsGameStart
+	{
+		get { return isGameStart; }
+	}
 	GameObject player;
-	[SerializeField] GameObject door;
 
 	[SerializeField] Animator transitionAnim;
-	[SerializeField] GameObject stopMenu;
 	string current_role;
 
 	public static event Action<GameObject> OnPlayerSpawned;
@@ -31,6 +30,7 @@ public class GameManager : MonoBehaviour
 	string path = Application.dataPath + "/streamingAssets";
 
 	public static GameManager instance;
+	public UIManager uiMgr;
 
 	void Awake()
 	{
@@ -45,17 +45,6 @@ public class GameManager : MonoBehaviour
 		else
 		{
 			Destroy(gameObject);
-		}
-	}
-
-
-	private void Update()
-	{
-		if (isGameStart && Input.GetKeyDown(KeyCode.M))
-		{
-			isGamePause = true;
-			stopMenu.SetActive(true);
-			Time.timeScale = 0;
 		}
 
 	}
@@ -106,6 +95,8 @@ public class GameManager : MonoBehaviour
 			// 在這裡加載玩家角色
 			current_role = LevelManager.instance.current_role;
 			LoadRole(current_role);
+			uiMgr = FindObjectOfType<UIManager>();
+
 		};
 	}
 
@@ -139,8 +130,6 @@ public class GameManager : MonoBehaviour
 		SFXManager.instance.ClickSound();
 		isGameStart = true;
 		LoadNextScene();
-		// current_role = LevelManager.instance.current_role;
-
 
 	}
 
@@ -151,6 +140,7 @@ public class GameManager : MonoBehaviour
 		SceneManager.LoadScene("Level_00");
 		LevelManager.instance.current_Level = 0;
 		Time.timeScale = 1;
+		isGameStart = false;
 
 	}
 
@@ -161,23 +151,11 @@ public class GameManager : MonoBehaviour
 
 	}
 
-	//	解除原本隱藏在關卡的門
+	// 解除原本隱藏在關卡的門
 	public void LevelFinished()
 	{
-		if (door != null)
-		{
-			SFXManager.instance.DoorAppear();
-			door.SetActive(true);
-		}
-	}
-
-	// 從pause menu回到遊戲
-	public void Continue()
-	{
-		SFXManager.instance.ClickSound();
-		isGamePause = false;
-		Time.timeScale = 1;
-		stopMenu.SetActive(false);
+		SFXManager.instance.DoorAppear();
+		uiMgr.UnhideDoor();
 	}
 
 	public void Save()//存擋
@@ -200,6 +178,7 @@ public class GameManager : MonoBehaviour
 		SFXManager.instance.ClickSound();
 
 		int levelNum = ReadJson.Instance.GetSavedLevel();
+		isGameStart = true;
 
 		if (levelNum != 0)
 		{
@@ -210,6 +189,11 @@ public class GameManager : MonoBehaviour
 		{
 			print("You dont have any saved file");
 		}
+	}
+
+	public bool GetGamePauseStatus()
+	{
+		return uiMgr.IsGamePause;
 	}
 
 }

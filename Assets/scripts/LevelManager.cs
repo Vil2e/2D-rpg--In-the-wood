@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
+// 紀錄目前Level index
 public class LevelManager : MonoBehaviour
 {
 	public static LevelManager instance;
@@ -12,6 +13,7 @@ public class LevelManager : MonoBehaviour
 	public int MaxLevel { get { return maxLevel; } }
 
 	public string current_role = "Role01";
+
 
 	void Awake()
 	{

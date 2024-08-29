@@ -31,8 +31,8 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-  
-   
+
+
     void FixedUpdate()
     {
         //canMove是用來讓揮劍時 使玩家不能移動
@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviour
     // trymove bool == true才會進行移動
     private bool TryMove(Vector2 direction)
     {
-        if(direction != Vector2.zero)
+        if (direction != Vector2.zero)
         {
             //確定是否有潛在的collision, 0表示沒有collision
             int count = rb.Cast(
@@ -107,7 +107,7 @@ public class PlayerController : MonoBehaviour
         {
             return false;
         }
- 
+
     }
 
     //處理move input
@@ -118,7 +118,7 @@ public class PlayerController : MonoBehaviour
         //這個if條件是讓input value維持在最後輸入的值
         //避免按左方向時面向左 放手後因為value是0跑回預設值而面向右
         //因為input沒有輸入值就會是0 當他value是0就會自動set float
-        if(movementInput != Vector2.zero)
+        if (movementInput != Vector2.zero)
         {
             animator.SetFloat("XInput", movementInput.x);
             animator.SetFloat("YInput", movementInput.y);
@@ -136,7 +136,7 @@ public class PlayerController : MonoBehaviour
     {
         LockMovement();
 
-        if(animator.GetFloat("XInput") != 0)
+        if (animator.GetFloat("XInput") != 0)
         {
             if (spriteRenderer.flipX == true)
             {
@@ -149,7 +149,7 @@ public class PlayerController : MonoBehaviour
 
         }
 
-        else if(animator.GetFloat("YInput") == 1)
+        else if (animator.GetFloat("YInput") == 1)
         {
             swordAttack.AttackUp();
         }
@@ -159,8 +159,6 @@ public class PlayerController : MonoBehaviour
             swordAttack.AttackDown();
 
         }
-
-
     }
 
     public void EndSwordAttack()
@@ -178,8 +176,6 @@ public class PlayerController : MonoBehaviour
     {
         canMove = true;
     }
-
-   
 
 
 }
