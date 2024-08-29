@@ -54,19 +54,15 @@ public class GameManager : MonoBehaviour
 
 	}
 
-	// 釋放內存
+
 	private void OnSceneUnloaded(Scene current)
-	{
+	{   // 釋放內存
 		if (asyncOperationHandle.IsValid())
 		{
-			// 釋放player
-			Addressables.Release(asyncOperationHandle);
-			// 釋放場景
-			Addressables.Release(sceneInstance);
-
-			// Debug.Log("資源已釋放");
+			StartCoroutine(DelayedRelease());
 		}
 	}
+
 
 	// 解除訂閱
 	private void OnDisable()
@@ -123,6 +119,25 @@ public class GameManager : MonoBehaviour
 			uiMgr = FindObjectOfType<UIManager>();
 
 		};
+	}
+
+	// 延遲一幀 確定場景切換順利 再釋放資源
+	private IEnumerator DelayedRelease()
+	{
+		// 延遲一幀
+		yield return null;
+
+		if (asyncOperationHandle.IsValid())
+		{
+			Addressables.Release(asyncOperationHandle);
+		}
+
+		if (sceneInstance.IsValid())
+		{
+			Addressables.Release(sceneInstance);
+		}
+
+		// Debug.Log("資源已釋放");
 	}
 
 	// 異步載入player Asset並生成
