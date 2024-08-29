@@ -55,21 +55,21 @@ public class GameManager : MonoBehaviour
 		while (!handle.IsDone)
 		{
 			// 印出目前進度
-			Debug.Log($"Loading Progress: {handle.PercentComplete * 100}%");
+			// Debug.Log($"Loading Progress: {handle.PercentComplete * 100}%");
 
 			// 等待下一幀再檢查進度
 			yield return null;
 		}
 
 		// 載入完成後印出100%
-		Debug.Log("Loading Progress: 100%");
+		// Debug.Log("Loading Progress: 100%");
 	}
 
 	// 換關(index num會在換關時遞增)
 	public void LoadNextScene()
 	{
 		transitionAnim.SetTrigger("End");
-		Debug.Log("LoadNextLevel is being called.");
+		// Debug.Log("LoadNextLevel is being called.");
 		StartCoroutine(LoadLevelAsset("Level_0" + (LevelManager.instance.current_Level + 1)));
 		transitionAnim.SetTrigger("Start");
 
@@ -111,7 +111,7 @@ public class GameManager : MonoBehaviour
 		{
 			if (handle.Status == AsyncOperationStatus.Succeeded && isGameStart)
 			{
-				print("instantiate player");
+				// print("instantiate player");
 				player = Instantiate(handle.Result);
 				OnPlayerSpawned?.Invoke(player);// 檢查OnPlayerSpawned是否有訂閱, 有則丟入player作為參數 null則return
 				Addressables.Release(asyncOperationHandle);

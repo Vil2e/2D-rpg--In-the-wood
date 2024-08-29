@@ -24,7 +24,6 @@ public class SFXManager : MonoBehaviour
 
 	public void SlashSound()
 	{
-		Debug.Log(GameManager.instance.GetGamePauseStatus());
 		if (GameManager.instance.GetGamePauseStatus() == false)
 		{
 			src.PlayOneShot(slashSound);
