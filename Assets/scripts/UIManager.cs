@@ -6,6 +6,9 @@ public class UIManager : MonoBehaviour
 {
 	[SerializeField] GameObject stopMenu;
 	[SerializeField] GameObject door;
+	[SerializeField] GameObject roleMenu;
+	[SerializeField] GameObject menuButton;
+
 
 	bool isGamePause = false;
 	public bool IsGamePause
@@ -27,6 +30,13 @@ public class UIManager : MonoBehaviour
 		stopMenu.SetActive(true);
 		Time.timeScale = 0;
 		isGamePause = true;
+
+	}
+
+	public void OpenRoleMenu()
+	{
+		menuButton.SetActive(false);
+		roleMenu.SetActive(true);
 
 	}
 
@@ -71,5 +81,11 @@ public class UIManager : MonoBehaviour
 	public void QuitGameButton()
 	{
 		GameManager.instance.QuitGame();
+	}
+
+	public void SetCurrentRoleButton(string role)
+	{
+		LevelManager.instance.current_role = role;
+		GameManager.instance.ClickStartGame();
 	}
 }

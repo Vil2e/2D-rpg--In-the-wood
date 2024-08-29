@@ -103,7 +103,7 @@ public class GameManager : MonoBehaviour
 	// 異步載入player Asset並生成
 	void LoadRole(string role)
 	{
-		print("current role: " + current_role);
+		// print("current role: " + current_role);
 		//確認載入成功 -> 生成物件, 否則印出錯誤訊息
 		AsyncOperationHandle<GameObject> asyncOperationHandle = Addressables.LoadAssetAsync<GameObject>(role);
 		StartCoroutine(ShowLoadingProgress(asyncOperationHandle));
@@ -195,5 +195,6 @@ public class GameManager : MonoBehaviour
 	{
 		return uiMgr.IsGamePause;
 	}
+
 
 }
