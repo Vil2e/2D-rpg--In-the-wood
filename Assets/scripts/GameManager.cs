@@ -30,11 +30,24 @@ public class GameManager : MonoBehaviour
 
 	string path = Application.dataPath + "/streamingAssets";
 
-	private void Awake()
+	public static GameManager instance;
+
+	void Awake()
 	{
-		current_role = LevelManager.instance.current_role;
-		LoadRole(current_role);
+		// 保持 GameManager 在場景切換後不被銷毀
+		DontDestroyOnLoad(this.gameObject);
+
+		// 其他的初始化邏輯
+		if (instance == null)
+		{
+			instance = this;
+		}
+		else
+		{
+			Destroy(gameObject);
+		}
 	}
+
 
 	private void Update()
 	{
@@ -82,18 +95,18 @@ public class GameManager : MonoBehaviour
 			LevelManager.instance.current_Level = 0;
 			level = "Level_0" + LevelManager.instance.current_Level;
 		}
-		AsyncOperationHandle<SceneInstance> sceneInstance = Addressables.LoadSceneAsync(level);
 
-		// 檢查異步載入是否成功
-		while (sceneInstance.Status != AsyncOperationStatus.Succeeded)
+		AsyncOperationHandle<SceneInstance> sceneInstance = Addressables.LoadSceneAsync(level, LoadSceneMode.Single, false);
+		yield return sceneInstance; // 等待sceneInstance載入完成 再繼續下一步
+
+		sceneInstance.Result.ActivateAsync().completed += (operation) =>
 		{
-			yield return null;
-		}
+			// Debug.Log("場景載入完成：" + level);
 
-		// 場景載入成功後 設定 current_role 並調用 LoadRole (Awake關掉 這裡打開會出問題)
-		// current_role = LevelManager.instance.current_role;
-		// LoadRole(current_role);
-
+			// 在這裡加載玩家角色
+			current_role = LevelManager.instance.current_role;
+			LoadRole(current_role);
+		};
 	}
 
 	// 異步載入player Asset並生成
@@ -112,6 +125,10 @@ public class GameManager : MonoBehaviour
 				OnPlayerSpawned?.Invoke(player);// 檢查OnPlayerSpawned是否有訂閱, 有則丟入player作為參數 null則return
 				Addressables.Release(asyncOperationHandle);
 			}
+			else
+			{
+				Debug.Log("角色載入失敗");
+			}
 		};
 
 	}
@@ -122,7 +139,7 @@ public class GameManager : MonoBehaviour
 		SFXManager.instance.ClickSound();
 		isGameStart = true;
 		LoadNextScene();
-		current_role = LevelManager.instance.current_role;
+		// current_role = LevelManager.instance.current_role;
 
 
 	}
